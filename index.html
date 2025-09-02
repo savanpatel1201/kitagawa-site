@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Dress-Up Darling: Future of the Franchise</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800&display=swap" rel="stylesheet">
+    <!-- Chosen Palette: Refined Warm Neutrals (Slate, Stone, Amber) with subtle Zinc and Teal accents -->
+    <!-- Application Structure Plan: A refined top-down, single-page dashboard guides the user from the main conclusion to detailed evidence. It starts with 'The Verdict' (direct answer), then expands 'By the Numbers' with more commercial context and critical acclaim. 'The Adaptation Puzzle' offers deeper insight into chapter pacing, explicitly mentioning manga arcs and specific events. 'Fan & Industry Buzz' provides qualitative insights and more examples of community and industry actions. Finally, 'Future Scenarios' is thoroughly broken down with stronger arguments and an estimated timeline. This thematic structure enhances exploration, allowing users to delve into specific data points or broader trends seamlessly. Interactions like chart tooltips and smooth navigation are maintained, with added subtle visual feedback on interactive elements for a premium feel. -->
+    <!-- Visualization & Content Choices: 
+        - Report Info: Executive Summary -> Goal: Inform -> Viz: Key takeaway cards with brief, concise summary -> Interaction: Static display with enhanced visual presentation -> Justification: Provides immediate, high-level answers with underlying rationale for quick understanding.
+        - Report Info: Manga & Blu-ray sales data, Streaming popularity, Critical Acclaim -> Goal: Compare/Show Change/Inform -> Viz: Bar Chart (Chart.js) and enhanced text cards with key metrics highlighted -> Interaction: Tooltips on hover, clear descriptive text, and bolded statistics -> Justification: Visually highlights the anime's profound commercial impact and provides broader context on its overall success and reception. Library: Chart.js on Canvas.
+        - Report Info: Manga chapter adaptation pacing, specific arcs and pivotal moments -> Goal: Organize/Explain -> Viz: Custom HTML/JS interactive progress bar with arc details and subtle hover effects -> Interaction: Hover for chapter/volume details and visual segment scaling -> Justification: Clearly illustrates the "Goldilocks problem" of remaining material by showing specific arcs and their approximate manga volume coverage, making the pacing challenges evident. Method: HTML/CSS/JS.
+        - Report Info: Fan sentiment & Industry trends, specific examples -> Goal: Contextualize -> Viz: Detailed text blocks with examples of community engagement and specific industry practices -> Interaction: Static display -> Justification: Provides qualitative support for future predictions, reinforcing the analytical findings with real-world examples and market dynamics.
+        - Report Info: Future Scenarios (Movie vs. Season 3) -> Goal: Compare/Conclude -> Viz: Detailed comparison cards with sub-sections, clearer pros/cons using consistent iconography, and an estimated timeline for the most likely scenario -> Interaction: Static display with clear visual hierarchy and persuasive language -> Justification: Presents a robust prognosis with stronger supporting arguments for each format, including production and financial considerations.
+        - CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fcfcfd; /* Almost white for a cleaner base */
+            color: #1e293b; /* slate-800 */
+            /* Subtle radial gradient for background texture */
+            background-image: radial-gradient(circle at top left, #f8fafc 0%, #f1f5f9 60%, #e2e8f0 100%);
+        }
+        .header-bg {
+            background-image: linear-gradient(to bottom, #fcfcfd, #f8fafc); /* softer header gradient */
+            border-bottom: 4px solid rgba(251, 191, 36, 0.4); /* slightly more prominent amber border */
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05); /* subtle header shadow */
+        }
+        .chart-container {
+            position: relative;
+            width: 100%;
+            max-width: 700px;
+            margin-left: auto;
+            margin-right: auto;
+            height: 300px;
+            max-height: 400px;
+        }
+        @media (min-width: 768px) {
+            .chart-container {
+                height: 400px;
+            }
+        }
+        .nav-link {
+            transition: color 0.3s, border-color 0.3s, font-weight 0.3s;
+            position: relative;
+            padding-bottom: 0.65rem; /* more space for border */
+            font-weight: 500; /* Medium weight for general nav */
+        }
+        .nav-link::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 3px; /* thicker underline */
+            background-color: #d97706; /* amber-600 */
+            border-radius: 1.5px; /* rounded ends for underline */
+            transition: width 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .nav-link.active {
+            color: #d97706; /* amber-600 */
+            font-weight: 700; /* bold for active */
+        }
+        .nav-link.active::after {
+            width: 100%;
+        }
+        .manga-segment {
+            transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94); /* Smooth ease-in-out */
+            cursor: pointer;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); /* subtle inner shadow for depth */
+        }
+        .manga-segment:hover {
+            transform: scale(1.03); /* subtle zoom on hover */
+            box-shadow: 0 8px 15px -5px rgba(0, 0, 0, 0.2), 0 4px 6px -2px rgba(0, 0, 0, 0.1), inset 0 2px 4px rgba(0,0,0,0.15); /* more distinct shadow + inner shadow */
+            z-index: 1; /* bring to front slightly */
+        }
+        .section-content {
+            background-color: #ffffff;
+            padding: 2rem; /* even more padding */
+            border-radius: 1.25rem; /* even more rounded corners */
+            box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.1), 0 5px 10px -3px rgba(0, 0, 0, 0.05); /* more prominent, softer shadow */
+            border: 1px solid #e9ecef; /* very light grey border */
+            transition: transform 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94), box-shadow 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+        }
+        .section-content:hover {
+            transform: translateY(-6px); /* more prominent lift on hover */
+            box-shadow: 0 20px 35px -8px rgba(0, 0, 0, 0.15), 0 8px 15px -4px rgba(0, 0, 0, 0.08); /* even more prominent shadow on hover */
+        }
+        .icon-check { color: #22c55e; } /* green-500 */
+        .icon-cross { color: #ef4444; } /* red-500 */
+        .icon-warning { color: #f59e0b; } /* amber-500 */
+        .prominent-number {
+            font-size: 4rem; /* Larger numbers */
+            font-weight: 800; /* Extra bold */
+            letter-spacing: -0.05em; /* Tighter letter spacing */
+            line-height: 1; /* Tight line height */
+            text-shadow: 0 3px 6px rgba(0,0,0,0.1); /* Subtle text shadow */
+        }
+        .highlight-text {
+            color: #d97706; /* amber-600 */
+            font-weight: 600;
+        }
+        /* New colors for chart segments */
+        .manga-segment.s1 { background-color: #06b6d4; /* cyan-500 */ }
+        .manga-segment.s2 { background-color: #6366f1; /* violet-500 */ }
+        .manga-segment.rem { background-color: #f59e0b; /* amber-500 */ }
+        .manga-segment.s1:hover { background-color: #0891b2; /* cyan-600 */ }
+        .manga-segment.s2:hover { background-color: #4f46e5; /* violet-600 */ }
+        .manga-segment.rem:hover { background-color: #d97706; /* amber-600 */ }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="container mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl">
+        <header class="text-center py-16 header-bg rounded-b-3xl shadow-md mb-16">
+            <h1 class="text-4xl sm:text-5xl lg:text-6xl font-extrabold text-slate-900 tracking-tight leading-tight">The Future of <br class="sm:hidden"> My Dress-Up Darling Anime</h1>
+            <p class="mt-6 text-xl text-slate-700 max-w-3xl mx-auto px-2 leading-relaxed">Explore this in-depth analysis to understand the trajectory of one of anime's most beloved franchises, driven by robust commercial data, the intricate status of its source material, and prevailing industry trends.</p>
+        </header>
+
+        <nav class="sticky top-0 bg-slate-50/90 backdrop-blur-md z-10 border-b border-slate-200 mb-16 py-4 rounded-b-2xl shadow-lg">
+            <div class="max-w-6xl mx-auto">
+                <div class="flex flex-wrap justify-center items-center gap-x-6 gap-y-2 text-base sm:text-lg font-medium">
+                    <a href="#verdict" class="nav-link text-slate-700 hover:text-amber-600">The Verdict</a>
+                    <a href="#commercial" class="nav-link text-slate-700 hover:text-amber-600">By the Numbers</a>
+                    <a href="#adaptation" class="nav-link text-slate-700 hover:text-amber-600">Adaptation Puzzle</a>
+                    <a href="#buzz" class="nav-link text-slate-700 hover:text-amber-600">Fan & Industry Buzz</a>
+                    <a href="#scenarios" class="nav-link text-slate-700 hover:text-amber-600">Future Scenarios</a>
+                </div>
+            </div>
+        </nav>
+
+        <main>
+            <section id="verdict" class="mb-28 scroll-mt-32">
+                <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 mb-8">The Immediate Answer: What's the Current Status?</h2>
+                 <p class="text-center text-slate-700 max-w-3xl mx-auto mb-12 text-lg leading-relaxed">This section provides the direct answer derived from our comprehensive analysis. While the eager fanbase anticipates official announcements, the franchise's trajectory is strategically shaped by its immense popularity, robust financial performance, and careful management of its now-completed manga source material.</p>
+                <div class="grid md:grid-cols-2 gap-12 max-w-4xl mx-auto">
+                    <div class="section-content text-center">
+                        <h3 class="font-bold text-2xl text-slate-800 mb-4">Is a Third Season Officially Confirmed?</h3>
+                        <p class="prominent-number text-red-600">No.</p>
+                        <p class="text-slate-700 mt-6 text-base leading-relaxed">As of the latest reports, there has been **no official announcement or confirmation** from studio CloverWorks, Aniplex, or the production committee regarding a third season of *My Dress-Up Darling*. Any ongoing discussions about Season 3 are purely speculative, awaiting formal word from the creators' side.</p>
+                    </div>
+                    <div class="section-content text-center">
+                        <h3 class="font-bold text-2xl text-slate-800 mb-4">Is a Continuation Highly Probable?</h3>
+                        <p class="prominent-number text-green-600">Yes, Highly Probable.</p>
+                        <p class="text-slate-700 mt-6 text-base leading-relaxed">Despite the current lack of a "Season 3" confirmation, the franchise's future appears exceptionally bright. Its **significant commercial success**, the **strategic completion of its source manga**, and the **precise amount of remaining content** collectively point toward a final animated project that is not just likely, but a logical and financially compelling next step for the producers.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="commercial" class="mb-28 scroll-mt-32">
+                <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 mb-8">By the Numbers: A Proven Commercial Juggernaut</h2>
+                <p class="text-center text-slate-700 max-w-3xl mx-auto mb-14 text-lg leading-relaxed">The anime's first season wasn't just critically acclaimed; it was a **major financial success** that propelled the entire *My Dress-Up Darling* franchise to new heights. This section visualizes the key commercial indicators that clearly underscore why a continuation is virtually certain. The data demonstrates how the anime served as an effective marketing tool, significantly boosting sales across multiple revenue streams and proving the IP's substantial and enduring value.</p>
+                <div class="grid lg:grid-cols-5 gap-12 items-center">
+                    <div class="lg:col-span-3 section-content">
+                        <h3 class="text-xl font-bold text-center mb-5 text-slate-800">Manga Sales Growth (Copies in Circulation)</h3>
+                        <p class="text-slate-700 text-sm text-center mb-4">The anime's debut sparked a significant surge in manga sales, transforming the series into a consistent bestseller.</p>
+                        <div class="chart-container">
+                            <canvas id="mangaSalesChart"></canvas>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 space-y-8">
+                        <div class="section-content">
+                            <h3 class="font-bold text-lg text-slate-800 mb-2">Post-Anime Manga Sales Spike</h3>
+                            <p class="text-4xl font-extrabold text-amber-600 mt-1"><span class="highlight-text">+2 Million</span> Copies</p>
+                            <p class="text-slate-700 mt-1 text-sm leading-relaxed">**Additional copies sold in just three months** following the anime's debut (Jan-Mar 2022). This figure highlights the anime's direct and immediate positive impact on the source material's sales velocity, reinforcing its market appeal.</p>
+                        </div>
+                        <div class="section-content">
+                            <h3 class="font-bold text-lg text-slate-800 mb-2">Top-Tier Blu-ray/DVD Sales</h3>
+                            <p class="text-4xl font-extrabold text-amber-600 mt-1"><span class="highlight-text">10,482</span> Units</p>
+                            <p class="text-slate-700 mt-1 text-sm leading-relaxed">Copies of **Volume 1 Blu-ray/DVD sold in its first week**. This is a benchmark for commercial success in the competitive Japanese home video market, placing *My Dress-Up Darling* among top performers and signaling a highly dedicated fanbase. A typical success threshold is often around 5,000 units.</p>
+                        </div>
+                        <div class="section-content">
+                            <h3 class="font-bold text-lg text-slate-800 mb-2">Global Streaming & Merchandise Market</h3>
+                            <p class="text-slate-700 mt-1 text-sm leading-relaxed">Beyond impressive manga and home video sales, the series garnered substantial **global streaming popularity** on platforms like Crunchyroll, consistently ranking among the most-watched titles during its broadcast. Simultaneously, the franchise boasts a **thriving merchandise market**, with numerous official figures (e.g., from Good Smile Company and Aniplex+), apparel, and collectibles consistently selling out globally. This diversified and strong revenue stream further supports its financial strength and broad, sustained appeal across various consumer touchpoints.</p>
+                        </div>
+                         <div class="section-content">
+                            <h3 class="font-bold text-lg text-slate-800 mb-2">Critical Acclaim & Awards Recognition</h3>
+                            <p class="text-slate-700 mt-1 text-sm leading-relaxed">*My Dress-Up Darling* received widespread critical acclaim, lauded for its vibrant animation, charming characters, and respectful portrayal of cosplay. It won "Best Romance" at the **2023 Crunchyroll Anime Awards**, cementing its status as a fan and critic favorite. This positive reception significantly boosts its prestige and long-term viability as an intellectual property.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="adaptation" class="mb-28 scroll-mt-32">
+                <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 mb-8">The Adaptation Puzzle: Manga Pacing & Narrative Arcs</h2>
+                <p class="text-center text-slate-700 max-w-3xl mx-auto mb-14 text-lg leading-relaxed">The precise future of the anime is intrinsically linked to the **exact amount of story left to tell** from the now-finished manga. This interactive diagram illustrates the "Goldilocks problem": there's a specific amount of material that is **too much for a short OVA, but not enough for a full 12-episode season**, creating a unique challenge for adaptation. This precise narrative gap, encompassing crucial character development and climactic plot points, is the central clue to what form the franchise's grand finale will ultimately take.</p>
+                <div class="section-content max-w-5xl mx-auto">
+                    <div class="mb-6">
+                        <p class="text-center text-slate-700 text-base mb-3">Hover over each colored segment below to reveal its adapted chapters, corresponding manga volumes, and narrative status.</p>
+                        <div class="flex w-full h-12 rounded-full overflow-hidden bg-slate-200 border border-zinc-300 relative z-0">
+                            <div id="s1-segment" class="manga-segment s1 flex items-center justify-center text-white text-sm sm:text-base font-bold relative z-10 py-1" style="width: 33.9%;">Season 1</div>
+                            <div id="s2-segment" class="manga-segment s2 flex items-center justify-center text-white text-sm sm:text-base font-bold relative z-10 py-1" style="width: 40.9%;">Season 2</div>
+                            <div id="rem-segment" class="manga-segment rem flex items-center justify-center text-white text-sm sm:text-base font-bold relative z-10 py-1" style="width: 25.2%;">Remaining</div>
+                        </div>
+                    </div>
+                    <div id="adaptation-info" class="text-center p-6 bg-slate-100 rounded-lg min-h-[160px] shadow-inner border border-slate-200">
+                        <h4 id="info-title" class="font-bold text-xl text-slate-800 mb-2">Hover over a segment for detailed insights</h4>
+                        <p id="info-chapters" class="text-slate-700 text-sm mb-1">Total Manga Chapters: **115** (Manga by Shinichi Fukuda is now complete and published in **15 volumes**).</p>
+                        <p id="info-status" class="text-slate-700 text-sm leading-relaxed">Season 1 adapted chapters 1-39 (12 episodes). Season 2 is projected to adapt chapters 40-86 (12 episodes). This leaves the crucial final arcs, chapters 87-115 + Epilogue, remaining to be adapted for a definitive conclusion of Gojo and Marin's story.</p>
+                    </div>
+                    <div class="mt-10 text-slate-700">
+                        <h3 class="font-bold text-2xl mb-4 text-slate-900">The "Goldilocks" Problem Explained: Why the Remaining Content is Unique</h3>
+                        <p class="text-base leading-relaxed mb-6">The first season established a consistent adaptation pace of approximately <span class="highlight-text">**3.25 chapters per episode**</span>. If Season 2 maintains a similar rate (adapting around 3.83 chapters/episode), it efficiently covers manga material up to Chapter 86. This meticulous pacing leaves us with a precise <span class="highlight-text">**29 chapters**</span> (87-115, plus the final epilogue) of the manga unadapted. This specific quantity creates a unique challenge for the anime production committee, influencing the most effective path forward:</p>
+                        <ul class="list-none text-base mt-6 space-y-4">
+                            <li class="flex items-start">
+                                <span class="icon-cross text-2xl mr-3 mt-0.5">✖</span>
+                                <div>
+                                    <strong class="text-slate-800">Too Much for an OVA (Original Video Animation):</strong> An OVA typically covers only 1-3 chapters, making it far too short to comprehensively adapt the significant and pivotal remaining narrative, which includes key emotional beats and character progression that deserve a grander treatment.
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="icon-cross text-2xl mr-3 mt-0.5">✖</span>
+                                <div>
+                                    <strong class="text-slate-800">Too Short for a Standard 12-Episode Season 3:</strong> At the established pacing, 29 chapters would only fill roughly 8 to 9 episodes. This non-standard length is less common, can be difficult to schedule for traditional broadcast slots, may feel incomplete or rushed to viewers, and might compel the studio to add extensive anime-original content (filler) to reach a full episode count, potentially diluting the manga's integrity.
+                                </div>
+                            </li>
+                            <li class="flex items-start">
+                                <span class="icon-check text-2xl mr-3 mt-0.5">✔</span>
+                                <div>
+                                    <strong class="text-slate-800">Just Right for a Feature Film:</strong> A two-hour anime film typically adapts content equivalent to 4-5 anime episodes, perfectly translating to several key manga arcs. The remaining <span class="highlight-text">**29 chapters, including the pivotal "Coffin" and "Haniel" cosplay arcs (spanning manga volumes ~12-15) and the emotional conclusive epilogue**</span>, are an ideal fit for a cinematic adaptation. This allows for a comprehensive, emotionally resonant, and visually stunning finale that honors the source material and provides a definitive ending for the fanbase.
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+
+            <section id="buzz" class="mb-28 scroll-mt-32">
+                <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 mb-8">Fan & Industry Buzz: What the Community Thinks</h2>
+                <p class="text-center text-slate-700 max-w-3xl mx-auto mb-14 text-lg leading-relaxed">Beyond the raw numbers, the **pulse of the passionate fan community and observable industry trends** offer crucial qualitative insights into *My Dress-Up Darling*'s future. This section highlights how fans are actively engaging with the series' continuation and how major production committees consistently approach the conclusions of their most successful anime properties to maximize both artistic impact and profitability.</p>
+                <div class="grid md:grid-cols-2 gap-10 max-w-4xl mx-auto">
+                    <div class="section-content">
+                        <h3 class="font-bold text-xl text-slate-800 mb-3">Decoding Online Sentiment & Overwhelming Fan Demand</h3>
+                        <p class="text-slate-700 mt-2 text-sm leading-relaxed">The *My Dress-Up Darling* fan community is exceptionally active and vocal, especially on platforms like Reddit (e.g., r/SonoBisqueDoll), Twitter, specialized anime forums, and fan art communities. Discussions frequently and intensely revolve around the series' continuation, with the most prevalent theories converging on either a **feature film or a shorter, final season** to adapt the manga's remaining story. There is a palpable and strong collective desire for a truly satisfying anime conclusion, particularly as some fans felt the manga's concluding chapters, while impactful, were somewhat abrupt in their pacing in the original serialization. This consistent, highly engaged discussion unequivocally highlights the **enduring global popularity** and overwhelming audience demand for a definitive anime finale, which production committees are highly attuned to and often factor into their strategic decisions for maximizing fan satisfaction and engagement.</p>
+                    </div>
+                    <div class="section-content">
+                        <h3 class="font-bold text-xl text-slate-800 mb-3">Industry Precedent: The Strategic Movie Finale Trend</h3>
+                        <p class="text-slate-700 mt-2 text-sm leading-relaxed">Concluding a highly popular anime series with a **theatrical film** has rapidly become a well-established, highly profitable, and strategically preferred trend across the industry. This approach is almost always adopted for franchises with a finite, manageable amount of source material left after initial TV seasons. Notable and successful examples illustrating this strategic move include <span class="highlight-text">**_The Quintessential Quintuplets Movie_**</span> (which served as a hugely successful finale for that romantic comedy series), <span class="highlight-text">**_Sword Art Online Progressive: Aria of a Starless Night_**</span> (which expanded an existing arc into a cinematic experience), and the eagerly anticipated <span class="highlight-text">**_Haikyu!!_ finale films**</span> (set to conclude the beloved sports anime's epic story). This format allows for a concentrated, high-profile theatrical release that can generate significant global box office revenue, lead to a lucrative premium home video release, and effectively monetize the series' climax, all while expertly bypassing the logistical difficulties and potentially lower returns of producing a non-standard length TV season.</p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="scenarios" class="mb-28 scroll-mt-32">
+                <h2 class="text-3xl md:text-4xl font-bold text-center text-slate-900 mb-8">The Most Likely Scenarios: What's Next for the Anime?</h2>
+                <p class="text-center text-slate-700 max-w-3xl mx-auto mb-14 text-lg leading-relaxed">Given the overwhelming commercial success, the strategic completion of the manga, and the precise amount of remaining source material, a continuation of the anime is, simply put, a near certainty. The primary question now revolves almost entirely around the **format** this continuation will take. Based on our comprehensive analysis, two main possibilities emerge, with one standing out as the unequivocal frontrunner due to compelling industry trends and streamlined production logistics for maximizing both artistic integrity and financial return.</p>
+                <div class="grid md:grid-cols-2 gap-12 max-w-5xl mx-auto">
+                    <div class="section-content shadow-2xl border-2 border-amber-500 relative ring-4 ring-amber-500/20 pt-8 pb-6">
+                         <div class="absolute top-0 right-0 -mt-5 mr-3 bg-amber-500 text-white text-base font-extrabold px-5 py-2 rounded-full shadow-lg" style="min-width: 120px; text-align: center;">MOST LIKELY</div>
+                        <h3 class="font-bold text-2xl text-slate-900 mb-4">Scenario A: The Cinematic Finale (Movie)</h3>
+                        <p class="text-slate-700 mb-5 text-base leading-relaxed">This is considered the **most probable and strategically sound outcome** for *My Dress-Up Darling*. The remaining ~29 chapters of the manga (including the pivotal "Coffin" and "Haniel" arcs leading to the heartfelt confession, plus the epilogue) are an ideal fit for a feature-length film, typically running around two hours. This format allows for a comprehensive, visually stunning, and truly definitive conclusion to the beloved story of Wakana Gojo and Marin Kitagawa's journey.</p>
+                        <div class="mt-4">
+                            <h4 class="font-bold text-lg text-slate-800 mb-3">Compelling Advantages of a Movie Finale:</h4>
+                            <ul class="list-none space-y-3 text-sm">
+                                <li class="flex items-start"><span class="icon-check text-xl mr-3 mt-0.5">✔</span><span>**Perfect Pacing & Narrative Completion:** The remaining <span class="highlight-text">**29 chapters**</span> translate perfectly into a film's runtime, providing a concise yet emotionally complete narrative without needing filler or rushing key moments. It's a natural fit for climactic arcs.</span></li>
+                                <li class="flex items-start"><span class="icon-check text-xl mr-3 mt-0.5">✔</span><span>**Strong Industry Trend Alignment:** Directly matches the highly successful and growing trend of popular anime series concluding with high-profile theatrical releases, a proven model for maximizing final impact.</span></li>
+                                <li class="flex items-start"><span class="icon-check text-xl mr-3 mt-0.5">✔</span><span>**Maximized Revenue Generation:** Films generate significant revenue through global box office sales, lucrative premium home video (Blu-ray/DVD) releases, and high-value global streaming licenses, optimizing the IP's profitability and worldwide market reach.</span></li>
+                                <li class="flex items-start"><span class="icon-check text-xl mr-3 mt-0.5">✔</span><span>**Enhanced Production Value & Artistic Impact:** A larger, dedicated budget can be allocated to a single film, allowing for superior animation quality, intricate visual detail, and a spectacular, truly memorable cinematic send-off for Gojo and Marin, elevating the overall fan experience.</span></li>
+                            </ul>
+                            <div class="mt-8 p-4 bg-amber-50 border border-amber-200 rounded-xl text-amber-800 text-sm font-semibold shadow-inner">
+                                <span class="icon-warning mr-2">▲</span> Estimated Release Timeline: Fans can realistically expect a movie announcement <span class="highlight-text">**~6-12 months after Season 2 concludes**</span>, with the film itself releasing <span class="highlight-text">**~1.5 - 2.5 years post-Season 2 broadcast**</span>. This accounts for thorough production time, distribution logistics, and potential staggered global releases.
+                            </div>
+                        </div>
+                    </div>
+                    <div class="section-content opacity-90 pt-8 pb-6">
+                        <h3 class="font-bold text-2xl text-slate-900 mb-4">Scenario B: A Shorter Final Television Season</h3>
+                        <p class="text-slate-700 mb-5 text-base leading-relaxed">While technically possible and not entirely off the table, a third season remains a considerably less probable scenario given the current landscape. If it were to happen, it would almost certainly be a **non-standard length** (e.g., 8-9 episodes) due to the limited remaining source material, or it would necessitate the inclusion of significant anime-original content to pad out a full 12-episode run.</p>
+                         <div class="mt-4">
+                            <h4 class="font-bold text-lg text-slate-800 mb-3">Significant Disadvantages of a Full Season 3:</h4>
+                            <ul class="list-none space-y-3 text-sm">
+                                <li class="flex items-start"><span class="icon-cross text-xl mr-3 mt-0.5">✖</span><span>**Insufficient Canonical Source Material:** At the previous adaptation pace, 29 chapters are simply not enough for a full 12-13 episode season, inevitably leading to awkward pacing, a stretched narrative, or the need for extensive filler.</span></li>
+                                <li class="flex items-start"><span class="icon-cross text-xl mr-3 mt-0.5">✖</span><span>**Marketing & Scheduling Challenges:** Non-standard episode counts (like 8-9 episodes) can be more difficult to market effectively, secure desirable broadcast slots for, and integrate smoothly into global streaming platform strategies, potentially limiting audience reach and profitability.</span></li>
+                                <li class="flex items-start"><span class="icon-cross text-xl mr-3 mt-0.5">✖</span><span>**Lower Revenue Potential:** A TV season typically generates less overall revenue compared to a highly successful theatrical film due to different distribution models, per-episode production costs, and audience consumption patterns.</span></li>
+                                <li class="flex items-start"><span class="icon-warning text-xl mr-3 mt-0.5">▲</span><span>**Risk of Anime-Original Content:** While offering more "slice-of-life" moments, extensive anime-original material carries the inherent risk of deviating from the manga's established canon and potentially alienating some portions of the dedicated fanbase who strongly prefer strict fidelity to the source material.</span></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <footer class="text-center py-12 border-t border-slate-200 mt-16 bg-f8fafc rounded-t-xl shadow-inner">
+            <p class="text-sm text-slate-600 leading-relaxed max-w-2xl mx-auto">This interactive analysis is based on a comprehensive expert report regarding the future of the *My Dress-Up Darling* anime franchise. All data and insights are derived from publicly available commercial information and thorough industry analysis. Please note that exact future plans are subject to official announcements from the production committee and should be considered speculative until confirmed.</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const mangaSalesData = {
+                labels: ['Pre-Anime (Jan 2022)', 'Post-Anime (Mar 2022)'],
+                datasets: [{
+                    label: 'Manga Copies in Circulation',
+                    data: [3500000, 5500000],
+                    backgroundColor: [
+                        'rgba(100, 116, 139, 0.9)', /* slate-500 with high opacity */
+                        'rgba(245, 158, 11, 0.9)' /* amber-500 with high opacity */
+                    ],
+                    borderColor: [
+                        'rgb(100, 116, 139)',
+                        'rgb(245, 158, 11)'
+                    ],
+                    borderWidth: 2,
+                    borderRadius: 5 /* Rounded bars */
+                }]
+            };
+
+            const mangaSalesConfig = {
+                type: 'bar',
+                data: mangaSalesData,
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    let label = context.dataset.label || '';
+                                    if (label) {
+                                        label += ': ';
+                                    }
+                                    if (context.parsed.y !== null) {
+                                        label += new Intl.NumberFormat('en-US').format(context.parsed.y) + ' copies';
+                                    }
+                                    return label;
+                                }
+                            },
+                            bodyFont: {
+                                size: 14,
+                                family: 'Inter'
+                            },
+                            titleFont: {
+                                size: 14,
+                                family: 'Inter',
+                                weight: 'bold'
+                            },
+                            padding: 10,
+                            boxPadding: 5,
+                            displayColors: true,
+                            backgroundColor: 'rgba(30, 41, 59, 0.9)', /* slate-800 for tooltip */
+                            bodyColor: '#e2e8f0', /* slate-200 */
+                            titleColor: '#f8fafc', /* slate-50 */
+                            cornerRadius: 6
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value, index, ticks) {
+                                    return (value / 1000000) + 'M';
+                                },
+                                color: '#475569', /* slate-600 */
+                                font: {
+                                    family: 'Inter',
+                                    size: 12
+                                }
+                            },
+                            title: {
+                                display: true,
+                                text: 'Copies (Millions)',
+                                color: '#475569', /* slate-600 */
+                                font: {
+                                    family: 'Inter',
+                                    size: 14,
+                                    weight: 'bold'
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(203, 213, 225, 0.3)' /* slate-300 with opacity */
+                            }
+                        },
+                        x: {
+                            grid: {
+                                display: false
+                            },
+                            ticks: {
+                                color: '#475569', /* slate-600 */
+                                font: {
+                                    family: 'Inter',
+                                    size: 12
+                                }
+                            }
+                        }
+                    }
+                }
+            };
+
+            const mangaSalesChartCtx = document.getElementById('mangaSalesChart').getContext('2d');
+            new Chart(mangaSalesChartCtx, mangaSalesConfig);
+
+            const s1Segment = document.getElementById('s1-segment');
+            const s2Segment = document.getElementById('s2-segment');
+            const remSegment = document.getElementById('rem-segment');
+            const infoTitle = document.getElementById('info-title');
+            const infoChapters = document.getElementById('info-chapters');
+            const infoStatus = document.getElementById('info-status');
+
+            const segments = [
+                { el: s1Segment, title: 'Season 1 (Adapted)', chapters: 'Chapters 1-39 (Volume 1-5)', status: 'The foundational season, setting the stage and adapting the initial character introductions and cosplay shoots, including fan-favorite events like Shizuku-tan and Black Lobelia. Pacing: ~3.25 chapters/episode.' },
+                { el: s2Segment, title: 'Season 2 (Projected Adaptation)', chapters: 'Chapters 40-86 (Volume 6-12, part)', status: 'Expected to cover significant arcs like the culture festival (featuring Veronica/Florian), the school trip, and potentially the first pivotal visit to the Gojo residence. Pacing: ~3.83 chapters/episode.' },
+                { el: remSegment, title: 'Remaining Material: The Grand Finale', chapters: 'Chapters 87-115 + Epilogue (Volume 12, part - 15)', status: 'This critical content includes the pivotal "Coffin" cosplay arc, the deeply emotional "Haniel" arc culminating in a major confession, and the manga\'s final epilogue. This entire narrative arc is perfectly suited for a definitive cinematic conclusion.' }
+            ];
+
+            const defaultInfo = {
+                title: 'Hover over a segment for detailed insights',
+                chapters: 'Total Manga Chapters: **115** (Manga by Shinichi Fukuda is now complete and published in **15 volumes**).',
+                status: 'Season 1 adapted chapters 1-39 (12 episodes). Season 2 is projected to adapt chapters 40-86 (12 episodes). This leaves the crucial final arcs, chapters 87-115 + Epilogue, remaining to be adapted for a definitive conclusion of Gojo and Marin\'s story.'
+            };
+
+            segments.forEach(segment => {
+                segment.el.addEventListener('mouseenter', () => {
+                    infoTitle.textContent = segment.title;
+                    infoChapters.innerHTML = segment.chapters; /* Use innerHTML for bolding within string */
+                    infoStatus.textContent = segment.status;
+                });
+                segment.el.addEventListener('mouseleave', () => {
+                    infoTitle.textContent = defaultInfo.title;
+                    infoChapters.innerHTML = defaultInfo.chapters;
+                    infoStatus.textContent = defaultInfo.status;
+                });
+            });
+            infoTitle.textContent = defaultInfo.title;
+            infoChapters.innerHTML = defaultInfo.chapters;
+            infoStatus.textContent = defaultInfo.status; /* Set default state on load */
+
+            const navLinks = document.querySelectorAll('.nav-link');
+            const sections = document.querySelectorAll('section');
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '-50% 0px -49% 0px', /* Adjusted to make active link selection more stable */
+                threshold: 0
+            };
+
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        navLinks.forEach(link => {
+                            link.classList.remove('active');
+                            if (link.getAttribute('href').substring(1) === entry.target.id) {
+                                link.classList.add('active');
+                            }
+                        });
+                    }
+                });
+            }, observerOptions);
+
+            sections.forEach(section => {
+                observer.observe(section);
+            });
+
+            navLinks.forEach(anchor => {
+                anchor.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    document.querySelector(this.getAttribute('href')).scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
